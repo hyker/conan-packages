@@ -21,6 +21,9 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()''')
 
     def build(self):
+        if self.settings.os == "iOS":
+            self.run("cd cryptopp && ./setenv-ios.sh %s" % self.settings.arch)
+
         cmake = CMake(self)
         shared = "-DBUILD_SHARED_LIBS=ON" if self.options.shared else ""
         self.run('cmake cryptopp %s %s' % (cmake.command_line, shared))
