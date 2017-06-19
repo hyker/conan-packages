@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 
 class CryptoppConan(ConanFile):
-    name            = "CryptoPP"
+    name            = "cryptopp"
     version         = "5.6.5"
     license         = "MIT"
     url             = "https://github.com/hykersec/conan-packages"
