@@ -84,14 +84,15 @@ class OpenSSLConan(ConanFile):
         config_options_string = ""
 
         if self.deps_cpp_info.include_paths:
-            include_path = self.deps_cpp_info["zlib"].include_paths[0]
-            if self.settings.os == "Windows":
-                lib_path = self.deps_cpp_info["zlib"].lib_paths[0] + "/" + self.deps_cpp_info["zlib"].libs[0] + ".lib"  # Concrete lib file
-            else:
-                lib_path = self.deps_cpp_info["zlib"].lib_paths[0] # Just path, linux will find the right file
-            config_options_string += ' --with-zlib-include="%s"' % include_path
-            config_options_string += ' --with-zlib-lib="%s"' % lib_path
-            # EFENCE LINK
+            if "zlib" in self.requires:
+                include_path = self.deps_cpp_info["zlib"].include_paths[0]
+                if self.settings.os == "Windows":
+                    lib_path = self.deps_cpp_info["zlib"].lib_paths[0] + "/" + self.deps_cpp_info["zlib"].libs[0] + ".lib"
+                else:
+                    lib_path = self.deps_cpp_info["zlib"].lib_paths[0]
+                config_options_string += ' --with-zlib-include="%s"' % include_path
+                config_options_string += ' --with-zlib-lib="%s"' % lib_path
+
             if "electric-fence" in self.requires:
                 libs = " ".join([ "-l%s" % lib for lib in self.deps_cpp_info["electric-fence"].libs])
                 config_options_string += ' -L"%s" -I"%s" %s' % (self.deps_cpp_info["electric-fence"].lib_paths[0],
@@ -100,6 +101,7 @@ class OpenSSLConan(ConanFile):
             else:
                 replace_in_file("./openssl-%s/Configure" % self.version, "::-lefence::", "::")
                 replace_in_file("./openssl-%s/Configure" % self.version, "::-lefence ", "::")
+            
             self.output.warn("=====> Options: %s" % config_options_string)
 
         for option_name in self.options.values.fields:
