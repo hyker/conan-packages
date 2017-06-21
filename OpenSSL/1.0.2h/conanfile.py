@@ -5,52 +5,55 @@ import os
 
 
 class OpenSSLConan(ConanFile):
-    name = "OpenSSL"
-    version = "1.0.2h"
-    settings = "os", "compiler", "arch", "build_type"
-    url="http://github.com/lasote/conan-openssl"
-    options = {"no_threads":        [True, False],
-               "no_electric_fence": [True, False],
-               "no_zlib":           [True, False],
-               "zlib_dynamic":      [True, False],
-               "shared":            [True, False],
-               "no_asm":            [True, False],
-               "386":               [True, False],
-               "no_sse2":           [True, False],
-               "no_bf":             [True, False],
-               "no_cast":           [True, False],
-               "no_des":            [True, False],
-               "no_dh":             [True, False],
-               "no_dsa":            [True, False],
-               "no_hmac":           [True, False],
-               "no_md2":            [True, False],
-               "no_md5":            [True, False],
-               "no_mdc2":           [True, False],
-               "no_rc2":            [True, False],
-               "no_rc4":            [True, False],
-               "no_rc5":            [True, False],
-               "no_rsa":            [True, False],
-               "no_sha":            [True, False]}
-    default_options = "=False\n".join(options.keys()) + "=False"
-
-    exports = ("win_bin/*", "readme.txt", "FindOpenSSL.cmake")
+    name                = "OpenSSL"
+    version             = "1.0.2h"
+    settings            = "os", "compiler", "arch", "build_type"
+    url                 = "http://github.com/lasote/conan-openssl"
+    options             = {
+        "no_threads":        [True, False],
+        "no_electric_fence": [True, False],
+        "no_zlib":           [True, False],
+        "zlib_dynamic":      [True, False],
+        "shared":            [True, False],
+        "no_asm":            [True, False],
+        "386":               [True, False],
+        "no_sse2":           [True, False],
+        "no_bf":             [True, False],
+        "no_cast":           [True, False],
+        "no_des":            [True, False],
+        "no_dh":             [True, False],
+        "no_dsa":            [True, False],
+        "no_hmac":           [True, False],
+        "no_md2":            [True, False],
+        "no_md5":            [True, False],
+        "no_mdc2":           [True, False],
+        "no_rc2":            [True, False],
+        "no_rc4":            [True, False],
+        "no_rc5":            [True, False],
+        "no_rsa":            [True, False],
+        "no_sha":            [True, False]
+    }
+    default_options     = "=False\n".join(options.keys()) + "=False"
+    exports             = ("win_bin/*", "readme.txt", "FindOpenSSL.cmake")
 
     # When a new version is avaiable they move the tar.gz to old/ location
-    source_tgz = "https://www.openssl.org/source/openssl-%s.tar.gz" % version
-    source_tgz_old = "https://www.openssl.org/source/old/1.0.2/openssl-%s.tar.gz" % version
-    counter_config = 0
+    source_tgz_url      = "https://www.openssl.org/source/openssl-%s.tar.gz" % version
+    source_tgz_old_url  = "https://www.openssl.org/source/old/1.0.2/openssl-%s.tar.gz" % version
+    source_tgz_filename = "openssl.tar.gz"
+    source_tgz_sha256   = "1d4007e53aad94a5b2002fe045ee7bb0b3d98f1a47f8b2bc851dcd1c74332919"
+    counter_config      = 0
 
     def source(self):
-        self.output.info("Downloading %s" % self.source_tgz)
+        self.output.info("Downloading %s" % self.source_tgz_filename)
         try:
-            tools.download(self.source_tgz_old, "openssl.tar.gz")
-            tools.unzip("openssl.tar.gz", ".")
+            tools.download(self.source_tgz_old_url, self.source_tgz_filename)
+            tools.unzip(self.source_tgz_filename, ".")
         except:
-            tools.download(self.source_tgz, "openssl.tar.gz")
-            tools.unzip("openssl.tar.gz", ".")
+            tools.download(self.source_tgz_url, self.source_tgz_filename)
+            tools.unzip(self.source_tgz_filename, ".")
 
-        tools.check_sha256("openssl.tar.gz", "1d4007e53aad94a5b2002fe045ee7bb0b3d98f1a47f8b2bc851dcd1c74332919")
-        os.unlink("openssl.tar.gz")
+        tools.check_sha256(self.source_tgz_filename, self.source_tgz_sha256)
+        os.unlink(self.source_tgz_filename)
 
     def config(self):
         self.counter_config += 1
@@ -224,4 +227,3 @@ class OpenSSLConan(ConanFile):
             self.cpp_info.libs = ["ssl", "crypto", "dl"]
         else:
             self.cpp_info.libs = ["ssl", "crypto"]
-
