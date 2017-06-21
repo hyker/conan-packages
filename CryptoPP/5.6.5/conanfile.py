@@ -11,8 +11,7 @@ class CryptoppConan(ConanFile):
     options           = {
         "shared": [True, False]
     }
-    default_options   = \
-        "shared=False"
+    default_options   = "=False\n".join(options.keys()) + "=False"
     generators        = "cmake"
     source_git_url    = "https://github.com/weidai11/cryptopp.git"
     source_git_commit = "aaf62695fc03bf941ec51e40a139f5e0eb8652f3"
