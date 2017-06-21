@@ -2,7 +2,6 @@ from conans import ConanFile
 from conans import tools
 import platform, os, sys
 
-
 class BoostConan(ConanFile):
     name = "Boost"
     version = "1.64.0"
@@ -47,52 +46,45 @@ class BoostConan(ConanFile):
         "header_only=False", \
         "fPIC=False", \
         "python=False", \
-        "without_atomic=False", \
-        "without_chrono=False", \
-        "without_container=False", \
-        "without_context=False", \
-        "without_coroutine=False", \
-        "without_coroutine2=False", \
+        "without_atomic=True", \
+        "without_chrono=True", \
+        "without_container=True", \
+        "without_context=True", \
+        "without_coroutine=True", \
+        "without_coroutine2=True", \
         "without_date_time=False", \
-        "without_exception=False", \
-        "without_filesystem=False", \
-        "without_graph=False", \
-        "without_graph_parallel=False", \
-        "without_iostreams=False", \
-        "without_locale=False", \
-        "without_log=False", \
-        "without_math=False", \
-        "without_mpi=False", \
-        "without_program_options=False", \
-        "without_random=False", \
+        "without_exception=True", \
+        "without_filesystem=True", \
+        "without_graph=True", \
+        "without_graph_parallel=True", \
+        "without_iostreams=True", \
+        "without_locale=True", \
+        "without_log=True", \
+        "without_math=True", \
+        "without_mpi=True", \
+        "without_program_options=True", \
+        "without_random=True", \
         "without_regex=False", \
         "without_serialization=False", \
-        "without_signals=False", \
+        "without_signals=True", \
         "without_system=False", \
-        "without_test=False", \
+        "without_test=True", \
         "without_thread=False", \
-        "without_timer=False", \
-        "without_type_erasure=False", \
-        "without_wave=False"
+        "without_timer=True", \
+        "without_type_erasure=True", \
+        "without_wave=True"
 
     url = "https://github.com/hykersec/conan-packages"
     exports = ["FindBoost.cmake", "OriginalFindBoost*"]
-    license="Boost Software License - Version 1.0. http://www.boost.org/LICENSE_1_0.txt"
+    license = "Boost Software License - Version 1.0. http://www.boost.org/LICENSE_1_0.txt"
     short_paths = True
 
     def config_options(self):
-        """ First configuration step. Only settings are defined. Options can be removed
-        according to these settings
-        """
         if self.settings.compiler == "Visual Studio":
             self.options.remove("fPIC")
 
     def configure(self):
-        """ Second configuration step. Both settings and options have values, in this case
-        we can force static library if MT was specified as runtime
-        """
-        if self.settings.compiler == "Visual Studio" and \
-           self.options.shared and "MT" in str(self.settings.compiler.runtime):
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in str(self.settings.compiler.runtime):
             self.options.shared = False
 
         if self.options.header_only:
@@ -101,20 +93,7 @@ class BoostConan(ConanFile):
             self.options.remove("fPIC")
             self.options.remove("python")
 
-        if not self.options.without_iostreams:
-            if self.settings.os == "Linux" or self.settings.os == "Macos":
-                self.requires("bzip2/1.0.6@lasote/stable")
-                if not self.options.header_only:
-                    self.options["bzip2/1.0.6"].shared = self.options.shared
-            self.requires("zlib/1.2.11@lasote/stable")
-            if not self.options.header_only:
-                self.options["zlib"].shared = self.options.shared
-
     def conan_info(self):
-        """ if it is header only, the requirements, settings and options do not affect the package ID
-        so they should be removed, so just 1 package for header only is generated, not one for each
-        different compiler and option. This is the last step, after build, and package
-        """
         if self.options.header_only:
             self.info.requires.clear()
             self.info.settings.clear()
@@ -160,6 +139,7 @@ class BoostConan(ConanFile):
             "--without-atomic": self.options.without_atomic,
             "--without-chrono": self.options.without_chrono,
             "--without-container": self.options.without_container,
+            "--without-context": self.options.without_context,
             "--without-coroutine": self.options.without_coroutine,
             "--without-coroutine2": self.options.without_coroutine2,
             "--without-date_time": self.options.without_date_time,
@@ -213,6 +193,11 @@ class BoostConan(ConanFile):
         except:
             pass
 
+        if self.settings.os == "iOS":
+            flags.append("architecture=arm target-os=iphone")
+            cxx_flags.append("-arch %s" % self.settings.arch)
+            cxx_flags.append("-isysroot %s" % "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk")
+
         cxx_flags = 'cxxflags="%s"' % " ".join(cxx_flags) if cxx_flags else ""
         flags.append(cxx_flags)
 
@@ -235,19 +220,9 @@ class BoostConan(ConanFile):
             self.run(full_command)#, output=False)
 
     def prepare_deps_options_env(self):
-        ret = {}
-#         if self.settings.os == "Linux" and "bzip2" in self.requires:
-#             include_path = self.deps_cpp_info["bzip2"].include_paths[0]
-#             lib_path = self.deps_cpp_info["bzip2"].lib_paths[0]
-#             lib_name = self.deps_cpp_info["bzip2"].libs[0]
-#             ret["BZIP2_BINARY"] = lib_name
-#             ret["BZIP2_INCLUDE"] = include_path
-#             ret["BZIP2_LIBPATH"] = lib_path
-
-        return ret
+        return {}
 
     def package(self):
-        # Copy findZLIB.cmake to package
         self.copy("FindBoost.cmake", ".", ".")
         self.copy("OriginalFindBoost*", ".", ".")
 
@@ -260,7 +235,6 @@ class BoostConan(ConanFile):
         self.copy(pattern="*.dll", dst="bin", src="%s/stage/lib" % self.FOLDER_NAME)
 
     def package_info(self):
-
         if not self.options.header_only and self.options.shared:
             self.cpp_info.defines.append("BOOST_ALL_DYN_LINK")
         else:
@@ -269,10 +243,11 @@ class BoostConan(ConanFile):
         if self.options.header_only:
             return
 
-        libs = ("wave unit_test_framework prg_exec_monitor test_exec_monitor container exception "
-                "graph iostreams locale log log_setup math_c99 math_c99f math_c99l math_tr1 "
-                "math_tr1f math_tr1l program_options random regex wserialization serialization "
-                "signals coroutine context timer thread chrono date_time atomic filesystem system").split()
+        libs = ("regex serialization thread date_time system").split()
+                #wave unit_test_framework prg_exec_monitor test_exec_monitor container exception "
+                #"graph iostreams locale log log_setup math_c99 math_c99f math_c99l math_tr1 "
+                #"math_tr1f math_tr1l program_options random regex wserialization serialization "
+                #"signals coroutine context timer thread chrono date_time atomic filesystem system").split()
 
         if self.options.python:
             libs.append("python")
