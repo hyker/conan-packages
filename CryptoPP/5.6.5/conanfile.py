@@ -27,8 +27,14 @@ conan_basic_setup()''')
 
     def build(self):
         if self.settings.os == "iOS":
+            arches = ["armv7", "armv7s", "arm64"]
+
             replace_in_file("./cryptopp/setenv-ios.sh", " == ", " = ")
-            self.run("cd cryptopp && . ./setenv-ios.sh %s && make -f GNUmakefile-cross" % self.settings.arch)
+            for arch in arches:
+                self.run("cd cryptopp && . ./setenv-ios.sh %s && make clean && make -f GNUmakefile-cross" % arch)
+                self.run("cd cryptopp && cp libcryptopp.a libcryptopp-%s.a" % arch)
+
+            self.run("cd cryptopp && lipo -create %s -output ./libcryptopp.a" % (" ".join(["./libcryptopp-%s.a" % arch for arch in arches])))
         else:
             cmake = CMake(self)
             self.run('cmake cryptopp %s %s' % (cmake.command_line, "-DBUILD_SHARED_LIBS=ON" if self.options.shared else ""))
