@@ -161,7 +161,8 @@ class BoostConan(ConanFile):
 
         if self.settings.os == "iOS":
             flags.append("architecture=arm target-os=iphone")
-            cxx_flags.append("-arch %s" % self.settings.arch)
+            for arch in ["armv7", "armv7s", "arm64"]:
+                cxx_flags.append("-arch %s" % arch)
             cxx_flags.append("-isysroot %s" % "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk")
 
         cxx_flags = 'cxxflags="%s"' % " ".join(cxx_flags) if cxx_flags else ""
