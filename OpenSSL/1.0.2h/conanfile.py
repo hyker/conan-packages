@@ -49,6 +49,7 @@ class OpenSSLConan(ConanFile):
 
     def source(self):
         if self.settings.os == "iOS":
+            self.output.info("Cloning %s" % self.builder_ios_url)
             self.run("git clone %s" % self.builder_ios_url)
         else:
             self.output.info("Downloading %s" % self.source_tgz_filename)
