@@ -48,10 +48,6 @@ class BoostConan(ConanFile):
     license             = "Boost Software License - Version 1.0. http://www.boost.org/LICENSE_1_0.txt"
     short_paths         = True
 
-    def config_options(self):
-        if self.settings.compiler == "Visual Studio":
-            self.options.remove("fPIC")
-
     def configure(self):
         if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in str(self.settings.compiler.runtime):
             self.options.shared = False
@@ -140,7 +136,6 @@ class BoostConan(ConanFile):
         if self.settings.compiler != "Visual Studio":
             if self.options.fPIC:
                 cxx_flags.append("-fPIC")
-
 
         # LIBCXX DEFINITION FOR BOOST B2
         try:
