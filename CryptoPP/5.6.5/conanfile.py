@@ -31,7 +31,7 @@ conan_basic_setup()''')
 
             replace_in_file("./cryptopp/setenv-ios.sh", " == ", " = ")
             for arch in arches:
-                self.run("cd cryptopp && . ./setenv-ios.sh %s && make clean && make -f GNUmakefile-cross" % arch)
+                self.run("cd cryptopp && . ./setenv-ios.sh %s && export CXXFLAGS='-DNDEBUG -g2 -O3 -fPIC -pipe -fembed-bitcode' && make clean && make -f GNUmakefile-cross" % arch)
                 self.run("cd cryptopp && cp libcryptopp.a libcryptopp-%s.a" % arch)
 
             self.run("cd cryptopp && lipo -create %s -output ./libcryptopp.a" % (" ".join(["./libcryptopp-%s.a" % arch for arch in arches])))
