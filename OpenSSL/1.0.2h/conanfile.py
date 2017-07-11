@@ -167,7 +167,7 @@ class OpenSSLConan(ConanFile):
                 configure_type = debug + "VC-WIN" + arch
                 # Will output binaries to ./binaries
                 config_command = "perl Configure %s no-asm --prefix=../binaries" % configure_type
-                whole_command = "%s %s" % (config_command, config_options_string)
+                whole_command = "%s %s -UOPENSSL_USE_APPLINK" % (config_command, config_options_string)
                 self.output.warn(whole_command)
                 run_in_src(whole_command)
     
@@ -184,7 +184,10 @@ class OpenSSLConan(ConanFile):
                 replace_in_file("./openssl-%s/ms/nt.mak" % self.version, "/MT ", "/%s " % runtime)
                 replace_in_file("./openssl-%s/ms/ntdll.mak" % self.version, "/MDd ", "/%s " % runtime)
                 replace_in_file("./openssl-%s/ms/nt.mak" % self.version, "/MTd ", "/%s " % runtime)
-    
+
+                replace_in_file("./openssl-%s/ms/ntdll.mak" % self.version, "-DOPENSSL_USE_APPLINK", "")
+                replace_in_file("./openssl-%s/ms/nt.mak"    % self.version, "-DOPENSSL_USE_APPLINK", "")
+
                 self.output.warn(os.curdir)
                 make_command = "nmake -f ms\\ntdll.mak" if self.options.shared else "nmake -f ms\\nt.mak "
                 self.output.warn("----------MAKE OPENSSL %s-------------" % self.version)
